@@ -1,0 +1,114 @@
+name: Feature / Subsystem Task
+description: Define a specific engine subsystem, kernel optimization, or milestone task for InferenceEngineX.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **InferenceEngineX Task Specification**
+        Every issue maps 1:1 to a dedicated feature branch and belongs to a specific Milestone Phase. Define the architectural scope, hardware constraints, and verification criteria before writing code.
+
+  - type: dropdown
+    id: milestone-phase
+    attributes:
+      label: Target Milestone Phase
+      description: Which project phase does this task belong to?
+      options:
+        - "Phase 1: The Naive Baseline"
+        - "Phase 2: Kernel Fusion & Memory Bandwidth (TensorRT-LLM Mindset)"
+        - "Phase 3: Continuous Batching & PagedAttention (vLLM Mindset)"
+        - "Phase 3.5: Algorithmic Acceleration & Test-Time Compute"
+        - "Phase 4: Cloud Migration (L40S / H100 / B200)"
+        - "Phase 5: Full-Stack Observability, Deterministic Replay & CI/CD"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: subsystem
+    attributes:
+      label: Engine Subsystem
+      description: Primary architectural component touched by this issue.
+      options:
+        - "Tokenizer & Detokenizer"
+        - "Zero-Copy Weight Loader"
+        - "CUDA Runtime & Kernel Layer (NVIDIA CUDA Rust / PTX)"
+        - "Model Execution Graph (Qwen Architecture)"
+        - "KV Cache & Memory Manager"
+        - "Logits Sampler"
+        - "High-Concurrency Serving & Router Layer"
+        - "Global Prefix & Distributed KV Cache"
+        - "Speculative Decoding & Test-Time Compute Engine"
+        - "Full-Stack Flight Recorder, Profiler & CI/CD"
+    validations:
+      required: true
+
+  - type: input
+    id: branch-name
+    attributes:
+      label: Target Branch Name
+      description: "Enforcing Rule: 1 Issue = 1 Branch (e.g., feat/issue-1-safetensors-loader)"
+      placeholder: "feat/issue-X-short-description"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve / Bottleneck
+      description: Describe the architectural requirement, compute/memory bottleneck, or use case this task addresses.
+      placeholder: "We need to implement ... / Currently, decode latency is bottlenecked by ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed solution & Low-Level Design (LLD)
+      description: Detail the data structures, Rust types, tensor shapes, memory layouts, or CUDA kernel launch configurations.
+      placeholder: |
+        - Input/Output Tensor Shapes:
+        - Memory Layout & Ownership (Host vs. Device VRAM):
+        - Key Rust Structs / Traits / CUDA Kernels:
+    validations:
+      required: true
+
+  - type: textarea
+    id: hardware-constraints
+    attributes:
+      label: Hardware, Precision & Memory Budget (RTX 5070 8GB / 384 GB/s)
+      description: Expected VRAM footprint, target precision (BF16/FP8/INT4), and compute vs. memory-bandwidth tradeoff.
+      placeholder: |
+        - Target Precision: BF16
+        - Estimated VRAM Delta: ~XXX MB
+        - Primary Bottleneck: Compute (Prefill FLOPS) / Memory Bandwidth (Decode GB/s)
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered & Tradeoffs
+      description: Any alternative algorithms, crate choices, or kernel strategies you evaluated and why they were rejected.
+    validations:
+      required: false
+
+  - type: textarea
+    id: verification-citations
+    attributes:
+      label: Verification Plan, Target Metrics & Citations
+      description: How will we test correctness (logit parity) and measure performance? List any papers to add to Citations.md.
+      placeholder: |
+        - Correctness Gate: Logit parity / KL-Divergence against PyTorch Qwen2.5-1.5B reference
+        - Metrics to Measure: TTFT, TPOT, Peak VRAM, MBU%
+        - Papers for Citations.md (if applicable):
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Links, Nsight trace references, architecture diagrams, or related issues.
+    validations:
+      required: false
