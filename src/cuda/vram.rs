@@ -34,7 +34,11 @@ impl VramTracker {
     pub fn guard(&self, requested: usize) -> Result<()> {
         let (used, _, _) = self.query()?;
         if used.saturating_add(requested) > self.cap_bytes {
-            return Err(EngineError::VramGuard { requested, used, cap: self.cap_bytes });
+            return Err(EngineError::VramGuard {
+                requested,
+                used,
+                cap: self.cap_bytes,
+            });
         }
         Ok(())
     }
