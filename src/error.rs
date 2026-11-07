@@ -26,6 +26,11 @@ pub enum EngineError {
     /// the driver would happily copy a short buffer and leave stale VRAM behind.
     #[error("shape mismatch: expected {expected} elements, got {got}")]
     ShapeMismatch { expected: usize, got: usize },
+
+    /// Zero-sized or `usize`-overflowing shape, rejected before the driver sees it:
+    /// `cuMemAlloc(0)` fails with an opaque INVALID_VALUE, and a wrapped size would under-allocate.
+    #[error("invalid tensor shape {shape:?}")]
+    InvalidShape { shape: [usize; 4] },
 }
 
 pub type Result<T> = std::result::Result<T, EngineError>;
