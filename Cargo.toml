@@ -1,0 +1,19 @@
+[package]
+name = "inference-engine-x"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Defaults turned off to drop nvrtc, curand, cublaslt and the CUDA runtime API (Phase 1 needs only the driver API and cuBLAS).
+# dynamic-loading: libcuda/cuBLAS are loaded at runtime, so the Mac (no CUDA) can still run `cargo check`.
+# cuda-12080: must match the laptop's 12.8 toolkit. 12.8 is the first release with sm_120 support.
+cudarc = { version = "0.19.10", default-features = false, features = ["std", "driver", "cublas", "f16", "dynamic-loading", "cuda-12080"] }
+half = "2.7.1"
+thiserror = "2"
+
+[dev-dependencies]
+# Only tests and bins use anyhow; library errors stay typed via EngineError.
+anyhow = "1"
+
+[lints.clippy]
+undocumented_unsafe_blocks = "deny"
