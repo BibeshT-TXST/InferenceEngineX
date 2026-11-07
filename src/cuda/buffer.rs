@@ -34,11 +34,20 @@ impl<T: DeviceRepr + ValidAsZeroBits> DeviceTensor<T> {
         gpu.vram().guard(bytes)?;
         let buf = gpu.stream().alloc_zeros::<T>(numel)?;
         // Suffix products cannot overflow: each is <= numel, which was checked above.
-        let strides = [shape[1] * shape[2] * shape[3], shape[2] * shape[3], shape[3], 1];
-        Ok(Self { buf, shape, strides })
+        let strides = [
+            shape[1] * shape[2] * shape[3],
+            shape[2] * shape[3],
+            shape[3],
+            1,
+        ];
+        Ok(Self {
+            buf,
+            shape,
+            strides,
+        })
     }
 
-        /// Enqueues HtoD on the tensor's stream and returns.
+    /// Enqueues HtoD on the tensor's stream and returns.
     // shortcut: from pageable `&[T]` the driver stages through its own pinned buffer, so this
     // never overlaps compute; upgrade to `PinnedHostSlice` if HtoD overlap ever matters.
     pub fn copy_from_host_async(&mut self, src: &[T]) -> Result<()> {
@@ -75,14 +84,26 @@ impl<T: DeviceRepr + ValidAsZeroBits> DeviceTensor<T> {
         Ok(())
     }
 
-    pub fn shape(&self) -> [usize; 4] { self.shape }
-    pub fn strides(&self) -> [usize; 4] { self.strides }
-    pub fn numel(&self) -> usize { self.buf.len() }
-    pub fn num_bytes(&self) -> usize { self.buf.num_bytes() }
+    pub fn shape(&self) -> [usize; 4] {
+        self.shape
+    }
+    pub fn strides(&self) -> [usize; 4] {
+        self.strides
+    }
+    pub fn numel(&self) -> usize {
+        self.buf.len()
+    }
+    pub fn num_bytes(&self) -> usize {
+        self.buf.num_bytes()
+    }
 
     /// Kernel launches and cuBLAS (Branches 4, 6) take `&CudaSlice` directly.
-    pub fn as_slice(&self) -> &DeviceBuffer<T> { &self.buf }
+    pub fn as_slice(&self) -> &DeviceBuffer<T> {
+        &self.buf
+    }
 
     /// Also Branch 2's raw-byte path: `unsafe { as_slice_mut().transmute_mut::<u8>(n) }`.
-    pub fn as_slice_mut(&mut self) -> &mut DeviceBuffer<T> { &mut self.buf }
+    pub fn as_slice_mut(&mut self) -> &mut DeviceBuffer<T> {
+        &mut self.buf
+    }
 }
