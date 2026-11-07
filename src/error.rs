@@ -13,10 +13,14 @@ pub enum EngineError {
     #[error("cuBLAS error: {0}")]
     Blas(#[from] CublasError),
 
-    /// Soft OOM guard tripped *before* calling the driver. Turning an 8 GB card's
-    /// hard OOM into a recoverable error keeps the WDDM display path from being starved.
-    #[error("VRAM guard: requested {requested} B, free {free} B, reserve {reserve} B")]
-    VramGuard { requested: usize, free: usize, reserve: usize },
+    /// Soft OOM guard tripped *before* calling the driver, so blowing the Phase 1
+    /// budget is a typed error instead of a driver OOM halfway through weight loading.
+    #[error("VRAM guard: requested {requested} B with {used} B in use exceeds cap {cap} B")]
+    VramGuard {
+        requested: usize,
+        used: usize,
+        cap: usize,
+    },
 
     /// Host/device element-count mismatch on copy. Checked on the host because
     /// the driver would happily copy a short buffer and leave stale VRAM behind.
