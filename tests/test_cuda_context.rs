@@ -17,8 +17,6 @@ static GPU: Mutex<()> = Mutex::new(());
 const MIB: usize = 1024 * 1024;
 /// 64 MiB of bf16 = [1, 1, 4096, 8192].
 const NUMEL: usize = 64 * MIB / 2;
-/// Headroom for memory-pool / page rounding; tighten once the laptop prints the real delta.
-const SLACK: usize = 4 * MIB;
 
 /// xorshift64, because `rand` is not a Branch 1 dependency. Raw bit patterns on purpose:
 /// NaN/Inf/subnormals are included, and only a `to_bits()` comparison can verify those.
@@ -61,10 +59,8 @@ fn roundtrip_64mib_bf16_and_vram_delta() -> anyhow::Result<()> {
         "alloc delta: {delta} B ({:.2} MiB)",
         delta as f64 / MIB as f64
     );
-    assert!(
-        (64 * MIB..=64 * MIB + SLACK).contains(&delta),
-        "alloc delta {delta} B"
-    );
+    // Measured exact on the laptop (WDDM, CUDA 12.8): the pool maps exactly the requested bytes.
+    assert_eq!(delta, 64 * MIB, "alloc delta");
 
     // Warm-up: the first copy pays the driver's one-time staging-buffer setup.
     t.copy_from_host(&host)?;
@@ -91,7 +87,7 @@ fn roundtrip_64mib_bf16_and_vram_delta() -> anyhow::Result<()> {
     drop(t);
     let leaked = free_before.saturating_sub(free_bytes(&gpu)?);
     println!("after drop: {leaked} B not yet returned");
-    assert!(leaked <= SLACK, "{leaked} B not returned after drop");
+    assert_eq!(leaked, 0, "bytes not returned after drop");
     Ok(())
 }
 
