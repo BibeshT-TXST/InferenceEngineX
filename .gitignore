@@ -3,3 +3,7 @@ AGENT_PROTOCOL.md
 INVARIANTS.md
 VERIFICATION.md
 SESSION_STATE.md
+
+# Added by cargo
+
+/target
